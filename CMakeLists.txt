@@ -26,7 +26,7 @@ add_definitions(${PCL_DEFINITIONS})
 #set(HEADERS main.h PangoVis.h)
 set(HEADERS main.h PangoCloud.h)
 
-add_executable(ShowPointCloud main.cpp ${HEADERS} ${SOURCES})
-target_link_libraries(ShowPointCloud ${Pangolin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBS})
+add_executable(PangoCloud main.cpp ${HEADERS} ${SOURCES})
+target_link_libraries(PangoCloud ${Pangolin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBS})
 
 

@@ -5,9 +5,10 @@
 #include <opencv2/opencv.hpp>
 
 void draw();
-void
-convertMatToCloud(
+void convertMatToCloud(
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr &ptCloud,
     cv::Mat &depthMat,
-    IplImage *rgbimg);
+    cv::Mat &rgbMat);
+
+
 #endif // MAIN_H

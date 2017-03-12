@@ -1,37 +1,43 @@
+/**
+ *  Minimal example of showing point cloud with Pangolin
+ *
+ *  Jacky Liu jjkka132 (at) gmail (dot) com
+ *  Mar 12 2017
+ */
+
+
+
+
 #include <iostream>
 #include <pangolin/pangolin.h>
 #include <pangolin/gl/gldraw.h>
 
 #include "main.h"
-//#include "PangoVis.h"
-
-
-
 
 
 struct CustomType
 {
-  CustomType()
-    : x(0), y(0.0f) {}
+    CustomType()
+        : x(0), y(0.0f) {}
 
-  CustomType(int x, float y, std::string z)
-    : x(x), y(y), z(z) {}
+    CustomType(int x, float y, std::string z)
+        : x(x), y(y), z(z) {}
 
-  int x;
-  float y;
-  std::string z;
+    int x;
+    float y;
+    std::string z;
 };
 
 std::ostream& operator<< (std::ostream& os, const CustomType& o){
-  os << o.x << " " << o.y << " " << o.z;
-  return os;
+    os << o.x << " " << o.y << " " << o.z;
+    return os;
 }
 
 std::istream& operator>> (std::istream& is, CustomType& o){
-  is >> o.x;
-  is >> o.y;
-  is >> o.z;
-  return is;
+    is >> o.x;
+    is >> o.y;
+    is >> o.z;
+    return is;
 }
 
 void SampleMethod()
@@ -46,23 +52,23 @@ void init()
     pangolin::ParseVarsFile("app.cfg");
 
     // Create OpenGL window in single line
-    pangolin::CreateWindowAndBind("Main",640,480);
+    pangolin::CreateWindowAndBind("Main",1024,768);
 
     // 3D Mouse handler requires depth testing to be enabled
     glEnable(GL_DEPTH_TEST);
 
     // Define Camera Render Object (for view / scene browsing)
     pangolin::OpenGlRenderState s_cam(
-      pangolin::ProjectionMatrix(640,480,420,420,320,240,0.1,1000),
-      pangolin::ModelViewLookAt(-0,0.5,-3, 0,0,0, pangolin::AxisY)
-    );
+                pangolin::ProjectionMatrix(640,480,420,420,320,240,0.1,1000),
+                pangolin::ModelViewLookAt(-0,0.5,-3, 0,0,0, pangolin::AxisY)
+                );
 
     const int UI_WIDTH = 180;
 
     // Add named OpenGL viewport to window and provide 3D Handler
     pangolin::View& d_cam = pangolin::CreateDisplay()
-      .SetBounds(0.0, 1.0, pangolin::Attach::Pix(UI_WIDTH), 1.0, -640.0f/480.0f)
-      .SetHandler(new pangolin::Handler3D(s_cam));
+        .SetBounds(0.0, 1.0, pangolin::Attach::Pix(UI_WIDTH), 1.0, -640.0f/480.0f)
+        .SetHandler(new pangolin::Handler3D(s_cam));
 
     // Add named Panel and bind to variables beginning 'ui'
     // A Panel is just a View with a default layout and input handling
@@ -96,72 +102,73 @@ void init()
     // Default hooks for exiting (Esc) and fullscreen (tab).
     while( !pangolin::ShouldQuit() )
     {
-      // Clear entire screen
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // Clear entire screen
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-      if( pangolin::Pushed(a_button) )
-        std::cout << "You Pushed a button!" << std::endl;
+        if( pangolin::Pushed(a_button) )
+          std::cout << "You Pushed a button!" << std::endl;
 
-      // Overloading of Var<T> operators allows us to treat them like
-      // their wrapped types, eg:
-      if( a_checkbox )
-        an_int = (int)a_double;
+        // Overloading of Var<T> operators allows us to treat them like
+        // their wrapped types, eg:
+        if( a_checkbox )
+          an_int = (int)a_double;
 
-      if( !any_type->z.compare("robot"))
+        if( !any_type->z.compare("robot"))
           any_type = CustomType(1,2.3f,"Boogie");
 
-      an_int_no_input = an_int;
+        an_int_no_input = an_int;
 
-      if( pangolin::Pushed(save_window) )
+        if( pangolin::Pushed(save_window) )
           pangolin::SaveWindowOnRender("window");
 
-      if( pangolin::Pushed(save_cube) )
+        if( pangolin::Pushed(save_cube) )
           d_cam.SaveOnRender("cube");
 
-      if( pangolin::Pushed(record_cube) )
+        if( pangolin::Pushed(record_cube) )
           pangolin::DisplayBase().RecordOnRender("ffmpeg:[fps=50,bps=8388608,unique_filename]//screencap.avi");
 
-      // Activate efficiently by object
-      d_cam.Activate(s_cam);
+        // Activate efficiently by object
+        d_cam.Activate(s_cam);
 
-      // Render some stuff
-      glColor3f(1.0,1.0,1.0);
-      //pangolin::glDrawColouredCube();
-      //pangolin::glDrawAxis(1);
-      //glTranslatef(0.0f, 0.0f, -100.0f);
-      //glColor4f(0,0,1,1);
-      //pangolin::glDrawLine(0,0,0, 0,0,1);
+        // Render some stuff
+        glColor3f(1.0,1.0,1.0);
+        //pangolin::glDrawColouredCube();
+        //pangolin::glDrawAxis(1);
+        //glTranslatef(0.0f, 0.0f, -100.0f);
+        //glColor4f(0,0,1,1);
+        //pangolin::glDrawLine(0,0,0, 0,0,1);
 
-      draw();
-      //glBegin(GL_LINES);
-//      glPointSize(20.0);
-//      glBegin(GL_POINTS);
-//        //glVertex3f(0.0f, 0.0f, 0.0f);
-//        glVertex3f(5.0f, 5.0f, 5.0f);
-//      glEnd();
-//      glBegin(GL_LINES);
-//        glVertex3f(0.0f, 0.0f, 0.0f);
-//        glVertex3f(4.9f, 4.9f, 4.9f);
-//      glEnd();
-      // Swap frames and Process Events
-      pangolin::FinishFrame();
+        draw();
+        //glBegin(GL_LINES);
+        //      glPointSize(20.0);
+        //      glBegin(GL_POINTS);
+        //        //glVertex3f(0.0f, 0.0f, 0.0f);
+        //        glVertex3f(5.0f, 5.0f, 5.0f);
+        //      glEnd();
+        //      glBegin(GL_LINES);
+        //        glVertex3f(0.0f, 0.0f, 0.0f);
+        //        glVertex3f(4.9f, 4.9f, 4.9f);
+        //      glEnd();
+        // Swap frames and Process Events
+        pangolin::FinishFrame();
     }
 }
 
 void draw()
 {
     /// RGB
-    IplImage *rgbimg = cvLoadImage("../1.png", CV_LOAD_IMAGE_UNCHANGED);
-    if(rgbimg == NULL)
-    {
-        return;
-    }
-
-    IplImage *rgbimg2 = cvLoadImage("../2.png", CV_LOAD_IMAGE_UNCHANGED);
-    if(rgbimg == NULL)
-    {
-        return;
-    }
+    cv::Mat rgbMat = imread("../1.png", cv::IMREAD_UNCHANGED);
+    //    IplImage *rgbimg = cvLoadImage("../1.png", CV_LOAD_IMAGE_UNCHANGED);
+    //    if(rgbimg == NULL)
+    //    {
+    //        return;
+    //    }
+    cv::Mat rgbMat2 = imread("../2.png", cv::IMREAD_UNCHANGED);
+    //    IplImage *rgbimg2 = cvLoadImage("../2.png", CV_LOAD_IMAGE_UNCHANGED);
+    //    if(rgbimg == NULL)
+    //    {
+    //        return;
+    //    }
 
     /// Depth
     cv::Mat depthMat = imread("../1d.png", cv::IMREAD_UNCHANGED);
@@ -176,8 +183,8 @@ void draw()
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr ptCloud (new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr ptCloud2 (new pcl::PointCloud<pcl::PointXYZRGB>);
 
-    convertMatToCloud(ptCloud, depthMat, rgbimg);
-    convertMatToCloud(ptCloud2, depthMat2, rgbimg2);
+    convertMatToCloud(ptCloud, depthMat, rgbMat);
+    convertMatToCloud(ptCloud2, depthMat2, rgbMat2);
 
 
     PangoCloud cloud(ptCloud.get());
@@ -189,9 +196,10 @@ void draw()
 
 void
 convertMatToCloud(
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr &ptCloud,
-    cv::Mat &depthMat,
-    IplImage *rgbimg)
+            pcl::PointCloud<pcl::PointXYZRGB>::Ptr &ptCloud,
+            cv::Mat &depthMat,
+            cv::Mat &rgbMat)
+//    IplImage *rgbimg)
 {
     //pcl::PointCloud<pcl::PointXYZ>::Ptr ptCloud (
     //    new pcl::PointCloud<pcl::PointXYZ>);
@@ -208,7 +216,7 @@ convertMatToCloud(
     float const cy_d = 234.047543;  // optical center y
 
 
-
+    unsigned char *rgbImg = (unsigned char*)(rgbMat.data);
 
     float factor = 5000;
 
@@ -219,6 +227,7 @@ convertMatToCloud(
     {
         for (int j = 0; j < depthMat.cols; j++)
         {
+
             unsigned short val = depthMat.at<unsigned short>(i, j);
             float z = static_cast<float>(val);
             //float z = static_cast<float>(*p);
@@ -227,12 +236,12 @@ convertMatToCloud(
             point.x = point.z*(cx_d - j)  / fx_d;
             point.y = point.z *(cy_d - i) / fy_d;
 
-            b = rgbimg->imageData[i*rgbimg->widthStep + (j*3)];
-            g = rgbimg->imageData[i*rgbimg->widthStep + (j*3) + 1];
-            r = rgbimg->imageData[i*rgbimg->widthStep + (j*3) + 2];
+            b = rgbMat.at<cv::Vec3b>(i,j)[2]; //B
+            g = rgbMat.at<cv::Vec3b>(i,j)[1]; //G
+            r = rgbMat.at<cv::Vec3b>(i,j)[0]; //R
 
             uint32_t rgb = (static_cast<uint32_t>(r) << 16 |
-              static_cast<uint32_t>(g) << 8 | static_cast<uint32_t>(b));
+                        static_cast<uint32_t>(g) << 8 | static_cast<uint32_t>(b));
             point.rgb = *reinterpret_cast<float*>(&rgb);
 
             ptCloud->points.push_back(point);
@@ -255,5 +264,5 @@ int main(int argc, char* argv[])
 
 
 
-  return 0;
+    return 0;
 }
