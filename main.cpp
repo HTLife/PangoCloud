@@ -6,6 +6,9 @@
 //#include "PangoVis.h"
 
 
+
+
+
 struct CustomType
 {
   CustomType()
@@ -123,7 +126,7 @@ void init()
 
       // Render some stuff
       glColor3f(1.0,1.0,1.0);
-      pangolin::glDrawColouredCube();
+      //pangolin::glDrawColouredCube();
       //pangolin::glDrawAxis(1);
       //glTranslatef(0.0f, 0.0f, -100.0f);
       //glColor4f(0,0,1,1);
@@ -131,15 +134,15 @@ void init()
 
       draw();
       //glBegin(GL_LINES);
-      glPointSize(20.0);
-      glBegin(GL_POINTS);
-        //glVertex3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(5.0f, 5.0f, 5.0f);
-      glEnd();
-      glBegin(GL_LINES);
-        glVertex3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(4.9f, 4.9f, 4.9f);
-      glEnd();
+//      glPointSize(20.0);
+//      glBegin(GL_POINTS);
+//        //glVertex3f(0.0f, 0.0f, 0.0f);
+//        glVertex3f(5.0f, 5.0f, 5.0f);
+//      glEnd();
+//      glBegin(GL_LINES);
+//        glVertex3f(0.0f, 0.0f, 0.0f);
+//        glVertex3f(4.9f, 4.9f, 4.9f);
+//      glEnd();
       // Swap frames and Process Events
       pangolin::FinishFrame();
     }
@@ -147,11 +150,107 @@ void init()
 
 void draw()
 {
+    /// RGB
+    IplImage *rgbimg = cvLoadImage("../1.png", CV_LOAD_IMAGE_UNCHANGED);
+    if(rgbimg == NULL)
+    {
+        return;
+    }
 
+    IplImage *rgbimg2 = cvLoadImage("../2.png", CV_LOAD_IMAGE_UNCHANGED);
+    if(rgbimg == NULL)
+    {
+        return;
+    }
+
+    /// Depth
+    cv::Mat depthMat = imread("../1d.png", cv::IMREAD_UNCHANGED);
+    double depthScale = 0.0001;
+    depthMat.convertTo(depthMat, CV_16UC1, 1000 * depthScale);
+
+    cv::Mat depthMat2 = imread("../2d.png", cv::IMREAD_UNCHANGED);
+    depthMat2.convertTo(depthMat2, CV_16UC1, 1000 * depthScale);
+
+    //int32_t depthSize = depthMat.total() * depthMat.elemSize();
+
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr ptCloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr ptCloud2 (new pcl::PointCloud<pcl::PointXYZRGB>);
+
+    convertMatToCloud(ptCloud, depthMat, rgbimg);
+    convertMatToCloud(ptCloud2, depthMat2, rgbimg2);
+
+
+    PangoCloud cloud(ptCloud.get());
+    PangoCloud cloud2(ptCloud2.get());
+    cloud.drawPoints();
 }
 
-int main(/*int argc, char* argv[]*/)
+
+
+void
+convertMatToCloud(
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr &ptCloud,
+    cv::Mat &depthMat,
+    IplImage *rgbimg)
+{
+    //pcl::PointCloud<pcl::PointXYZ>::Ptr ptCloud (
+    //    new pcl::PointCloud<pcl::PointXYZ>);
+
+    // calibration parameters
+    //float const fx_d = 5.9421434211923247e+02;
+    //float const fy_d = 5.9104053696870778e+02;
+    //float const cx_d = 3.3930780975300314e+02;
+    //float const cy_d = 2.4273913761751615e+02;
+
+    float const fx_d = 591.123473;  // focal length x
+    float const fy_d = 590.076012;  // focal length y
+    float const cx_d = 331.038659;  // optical center x
+    float const cy_d = 234.047543;  // optical center y
+
+
+
+
+    float factor = 5000;
+
+    uint8_t r(255), g(15), b(15);
+
+    unsigned char* p = depthMat.data;
+    for (int i = 0; i<depthMat.rows; i++)
+    {
+        for (int j = 0; j < depthMat.cols; j++)
+        {
+            unsigned short val = depthMat.at<unsigned short>(i, j);
+            float z = static_cast<float>(val);
+            //float z = static_cast<float>(*p);
+            pcl::PointXYZRGB point;
+            point.z = z / factor;
+            point.x = point.z*(cx_d - j)  / fx_d;
+            point.y = point.z *(cy_d - i) / fy_d;
+
+            b = rgbimg->imageData[i*rgbimg->widthStep + (j*3)];
+            g = rgbimg->imageData[i*rgbimg->widthStep + (j*3) + 1];
+            r = rgbimg->imageData[i*rgbimg->widthStep + (j*3) + 2];
+
+            uint32_t rgb = (static_cast<uint32_t>(r) << 16 |
+              static_cast<uint32_t>(g) << 8 | static_cast<uint32_t>(b));
+            point.rgb = *reinterpret_cast<float*>(&rgb);
+
+            ptCloud->points.push_back(point);
+            ++p;
+        }
+    }
+
+    ptCloud->width = (int)depthMat.cols;
+    ptCloud->height = (int)depthMat.rows;
+
+    //return ptCloud;
+}
+
+int main(int argc, char* argv[])
 {  
+
+
+
     init();
 
 
