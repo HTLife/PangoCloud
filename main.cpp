@@ -12,6 +12,9 @@
 #include <pangolin/pangolin.h>
 #include <pangolin/gl/gldraw.h>
 #include <pcl/common/transforms.h>
+
+#include <pcl/registration/icp.h>
+
 #include "main.h"
 
 
@@ -222,6 +225,20 @@ void loadImages()
 
 }
 
+Eigen::Affine3d create_rotation_matrix(
+        double ax,
+        double ay,
+        double az) {
+  Eigen::Affine3d rx =
+      Eigen::Affine3d(Eigen::AngleAxisd(ax, Eigen::Vector3d(1, 0, 0)));
+  Eigen::Affine3d ry =
+      Eigen::Affine3d(Eigen::AngleAxisd(ay, Eigen::Vector3d(0, 1, 0)));
+  Eigen::Affine3d rz =
+      Eigen::Affine3d(Eigen::AngleAxisd(az, Eigen::Vector3d(0, 0, 1)));
+  return rz * ry * rx;
+}
+
+
 void calculate(double th)
 {
     RESULT_OF_PNP result = estimateMotion( frame1, frame2, camera, th );
@@ -257,6 +274,25 @@ void calculate(double th)
     //    pcl::PointCloud< PointT > &cloud_out,
     //    const Eigen::Matrix< Scalar, 3, 1 > &offset,
     //    const Eigen::Quaternion< Scalar > &rotation)
+
+
+//    Eigen::Affine3d r = create_rotation_matrix(result.rvec[0], result.rvec[1], result.rvec[2]);
+//    Eigen::Affine3d t(Eigen::Translation3d(Eigen::Vector3d(result.tvec[0],result.tvec[1],result.tvec[2])));
+//    Eigen::Matrix4d m4d = (t * r).matrix();
+/*
+    pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB> icp;
+    icp.setInputCloud(ptCloud_new);
+    icp.setInputTarget(ptCloud);
+
+    pcl::PointCloud<pcl::PointXYZRGB> Final;
+    icp.align(Final);
+    std::cout << "has converged:" << icp.hasConverged() << " score: " <<
+    icp.getFitnessScore() << std::endl;
+    std::cout << icp.getFinalTransformation() << std::endl;
+
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr ptCloud_new2 (new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::transformPointCloud( *ptCloud_new, *ptCloud_new2, icp.getFinalTransformation() );
+*/
 
     cloud = new PangoCloud(ptCloud.get());
     cloud2 = new PangoCloud(ptCloud_new.get());

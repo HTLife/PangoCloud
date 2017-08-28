@@ -4,10 +4,10 @@ cmake_minimum_required(VERSION 2.8.1)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 
-set(OpenCV_DIR /home/jacky/code/KintinuousExt/deps/opencv-2.4.9/build)
-INCLUDE_DIRECTORIES(/home/jacky/code/KintinuousExt/deps/opencv-2.4.9/build/include)
-set(OpenCV_INCLUDE_DIRS /home/jacky/code/KintinuousExt/deps/opencv-2.4.9/build/include)
-set(OpenCV_LIBS /home/jacky/code/KintinuousExt/deps/opencv-2.4.9/build/lib)
+#set(OpenCV_DIR /home/jacky/code/KintinuousExt/deps/opencv-2.4.9/build)
+#INCLUDE_DIRECTORIES(/home/jacky/code/KintinuousExt/deps/opencv-2.4.9/build/include)
+#set(OpenCV_INCLUDE_DIRS /home/jacky/code/KintinuousExt/deps/opencv-2.4.9/build/include)
+#set(OpenCV_LIBS /home/jacky/code/KintinuousExt/deps/opencv-2.4.9/build/lib)
 
 
 find_package(OpenCV REQUIRED)
